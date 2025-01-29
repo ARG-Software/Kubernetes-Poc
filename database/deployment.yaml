@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logger-database
+  namespace: logger-k8s
+  labels:
+    app: logger-database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logger-database
+  template:
+    metadata:
+      labels:
+        app: logger-database
+    spec:
+      containers:
+        - name: database
+          image: postgres:15
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: logger-config
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: logger-config
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: logger-config
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: logger-config
+                  key: POSTGRES_HOST
+            - name: POSTGRES_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: logger-config
+                  key: POSTGRES_PORT
+            - name: POSTGRES_SCHEMA
+              valueFrom:
+                configMapKeyRef:
+                  name: logger-config
+                  key: POSTGRES_SCHEMA
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: database-data
+      volumes:
+        - name: database-data
+          persistentVolumeClaim:
+            claimName: database-data-pvc

@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: logger
-          image: blekso/logger:latest
+          image: argsoftware/logger:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8000

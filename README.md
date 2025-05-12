@@ -48,6 +48,27 @@ A **ConfigMap** stores environment variables required by the API and database. T
 
 ---
 
+## ⚙️ Configuring Environment Variables
+
+Before deploying the API and database, ensure that the necessary environment variables are set using a **ConfigMap**. This allows Kubernetes to inject environment variables into the containers dynamically.
+
+Create and apply the following `api/configmap.yaml` file:
+
+```yaml
+DATABASE_URL: Url to the Database
+POSTGRES_DB: Database name
+POSTGRES_USER: Database user name
+POSTGRES_PASSWORD: Database password
+POSTGRES_HOST: Name of the host of the DB, ex. database-logger
+POSTGRES_PORT: Database port
+POSTGRES_SCHEMA: Database schema, usually 'public'
+PORT: Logger port
+```
+
+This step is crucial to ensure that **environment variables** are injected into the database and API containers before they start.
+
+---
+
 ## 🚀 Steps to Run the `kubernetes-poc` Locally
 
 ### **1️⃣ Start the Kubernetes Cluster (K3d)**
@@ -81,12 +102,12 @@ kubectl get svc -n logger-k8s
 
 You should see the API and database running as separate pods.
 
-### **4️⃣ Build and Push the API Docker Image**
+### **3️⃣ Verify the ConfigMap**
 
-Before deploying, ensure the latest API image is built and pushed to Docker Hub:
+Ensure that the ConfigMap is correctly applied:
 
 ```sh
-docker build -t blekso/logger:latest .
+kubectl get configmap logger-config -n logger-k8s -o yaml
 ```
 
 ### **5️⃣ Apply Database Migrations (Manually)**
@@ -101,45 +122,6 @@ Migrations are stored in `/migrations/*.sql` and should be applied manually:
    ```sh
    copy and run SQL commands from /database/migrations/20250128164258_init/migration.sql
    ```
-
----
-
-## ⚙️ Configuring Environment Variables
-
-Before deploying the API and database, ensure that the necessary environment variables are set using a **ConfigMap**. This allows Kubernetes to inject environment variables into the containers dynamically.
-
-### **1️⃣ ConfigMap Configuration**
-
-Create and apply the following `api/configmap.yaml` file:
-
-```yaml
-DATABASE_URL: Url to the Database
-POSTGRES_DB: Database name
-POSTGRES_USER: Database user name
-POSTGRES_PASSWORD: Database password
-POSTGRES_HOST: Name of the host of the DB, ex. database-logger
-POSTGRES_PORT: Database port
-POSTGRES_SCHEMA: Database schema, usually 'public'
-PORT: Logger port
-```
-
-### **2️⃣ Apply the ConfigMap**
-
-Before deploying the database and API, apply the **ConfigMap**:
-
-```sh
-kubectl apply -f api/configmap.yaml
-```
-
-### **3️⃣ Verify the ConfigMap**
-
-Ensure that the ConfigMap is correctly applied:
-
-```sh
-kubectl get configmap logger-config -n logger-k8s -o yaml
-```
-
-This step is crucial to ensure that **environment variables** are injected into the database and API containers before they start.
 
 ---
 

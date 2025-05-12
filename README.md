@@ -99,32 +99,8 @@ Migrations are stored in `/migrations/*.sql` and should be applied manually:
    ```
 2. **Run SQL commands from migration files:**
    ```sh
-   \i /path/to/migration.sql
+   copy and run SQL commands from /database/migrations/20250128164258_init/migration.sql
    ```
-
----
-
-## 📡 Accessing the API
-
-### **1️⃣ Using NodePort**
-
-```sh
-curl http://localhost:30000/logs
-```
-
-### **2️⃣ Using LoadBalancer**
-
-Check the external IP of the `logger` service:
-
-```sh
-kubectl get svc -n logger-k8s
-```
-
-Then access it via:
-
-```sh
-curl http://<EXTERNAL-IP>:8000/logs
-```
 
 ---
 
@@ -164,6 +140,34 @@ kubectl get configmap logger-config -n logger-k8s -o yaml
 ```
 
 This step is crucial to ensure that **environment variables** are injected into the database and API containers before they start.
+
+---
+
+## 📡 Accessing the API
+
+### **1️⃣ Logs**
+
+```sh
+curl http://localhost:8000/logs
+```
+
+### **2️⃣ Loadbalancing check**
+
+```sh
+curl http://localhost:8000
+```
+
+Example output:
+
+```
+curl http://localhost:8000
+Hello from instance: logger-f5685948d-9v8mb%
+```
+
+```
+curl http://localhost:8000
+Hello from instance: logger-f5685948d-ct5rg%
+```
 
 ---
 

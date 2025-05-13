@@ -1,0 +1,18 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: prisma-migrate-job
+  namespace: logger-k8s
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      containers:
+        - name: migrate
+          image: argsoftware/logger:latest
+          imagePullPolicy: Always
+          command: ["npx", "prisma", "migrate", "deploy"]
+          envFrom:
+            - configMapRef:
+                name: logger-config
+      restartPolicy: Never

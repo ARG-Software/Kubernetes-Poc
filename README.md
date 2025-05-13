@@ -14,7 +14,7 @@ In this PoC, Kubernetes is used to:
 - Manage a **PostgreSQL database** within a **Kubernetes cluster**.
 - Expose the API to the host machine using **LoadBalancer** and **NodePort**.
 - Store environment variables using **ConfigMaps**.
-- Apply **manual database migrations** from `.sql` files.
+- Apply **automated database migrations** using a **Kubernetes Job**.
 
 ---
 
@@ -52,7 +52,11 @@ A **ConfigMap** stores environment variables required by the API and database. T
 
 Before deploying the API and database, ensure that the necessary environment variables are set using a **ConfigMap**. This allows Kubernetes to inject environment variables into the containers dynamically.
 
-Create and apply the following `api/configmap.yaml` file:
+```sh
+cp api/configmap.yaml.example api/configmap.yaml
+```
+
+Then edit the file to include real values.
 
 ```yaml
 DATABASE_URL: Url to the Database
@@ -89,6 +93,8 @@ kubectl apply -f database/pvc.yaml
 kubectl apply -f api/configmap.yaml
 kubectl apply -f database/deployment.yaml
 kubectl apply -f database/service.yaml
+kubectl apply -f api/migrate-job.yaml
+kubectl wait --for=condition=complete job/prisma-migrate-job -n logger-k8s
 kubectl apply -f api/deployment.yaml
 kubectl apply -f api/service.yaml
 ```
@@ -110,18 +116,13 @@ Ensure that the ConfigMap is correctly applied:
 kubectl get configmap logger-config -n logger-k8s -o yaml
 ```
 
-### **5️⃣ Apply Database Migrations (Manually)**
+### **5️⃣ Check Migration Logs (Optional)**
 
-Migrations are stored in `/migrations/*.sql` and should be applied manually:
+Once the migration job is complete, you can inspect its logs with:
 
-1. **Open a shell inside the database pod:**
-   ```sh
-   kubectl exec -it <postgres-pod-name> -n logger-k8s -- psql -U logs-user -d logs-db
-   ```
-2. **Run SQL commands from migration files:**
-   ```sh
-   copy and run SQL commands from /database/migrations/20250128164258_init/migration.sql
-   ```
+```sh
+kubectl logs job/prisma-migrate-job -n logger-k8s
+```
 
 ---
 
